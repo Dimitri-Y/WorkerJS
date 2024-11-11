@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прості числа</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+<p>Пошук простих чисел від <input id="from" value="1"> до <input id="to" value="2000000" size="100">.</p>
+<button onclick="doSearchWithWorker()" id="searchButtonWorker">Почати пошук з Веб Воркером</button>
+<button onclick="doSearchAsync()" id="searchButtonAsync">Почати Асинхронний пошук</button>
+<button onclick="doSearchSync()" id="searchButtonSync">Почати Синхронний пошук</button>
+<div>
+<button onclick="cancelSearch('')" id="cancelButton">Відмінити</button>
+</div>
+<div id="status"></div>
+<div id="primeContainer"></div>
+
+<script id="FindPrimes" type="javascript/worker">
+onmessage = function(event) {  
+  var primes = findPrimes(event.data.from, event.data.to);
+  postMessage(
+   {type: "PrimeList", data: primes}
+  );
+};
+
+function findPrimes(fromNumber, toNumber) {
+  var list = [];
+  for (var i=fromNumber; i<=toNumber; i++) {
+    if (i>1) list.push(i);
+  }
+
+  var maxDiv = Math.round(Math.sqrt(toNumber));
+  var primes = [];
+
+  var previousProgress;
+
+  for (var i=0; i<list.length; i++) {
+    var failed = false;
+    for (var j=2; j<=maxDiv; j++) {
+      if ((list[i] != j) && (list[i] % j == 0)) {
+        failed = true;
+      } else if ((j==maxDiv) && (failed == false)) {
+        primes.push(list[i]);
+      }
+    }
+
+    var progress = Math.round(i/list.length*100);
+    if (progress != previousProgress) {
+      postMessage(
+       {type: "Progress", data: progress}
+      );
+      previousProgress = progress;   
+    }
+  }
+
+  return primes;
+}
+</script>
+<script src="index.js"></script>
+</body>
+</html>

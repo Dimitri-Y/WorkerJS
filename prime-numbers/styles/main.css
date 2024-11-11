@@ -1,0 +1,45 @@
+body {
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    margin: 20px;
+  }
+  
+  #primeContainer {
+    border: solid 1px black;
+    padding: 3px;
+    height: 300px;
+    max-width: 1000px;
+    overflow: scroll;
+    overflow-x: hidden;
+    font-size: x-small;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  ::-webkit-scrollbar {
+    width: 2em;
+    height: 2em
+}
+::-webkit-scrollbar-button {
+    background: #ccc
+}
+::-webkit-scrollbar-track-piece {
+    background: #888
+}
+::-webkit-scrollbar-thumb {
+    background: #eee
+}​
+  input {
+    width: 80px;
+  }
+  
+  button {
+    padding: 3px;
+  }
+  
+  p {
+    margin-bottom: 3px;
+  }
+  
+  #status {
+    color: darkred;
+  }
+  
