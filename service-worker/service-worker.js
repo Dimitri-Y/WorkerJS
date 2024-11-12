@@ -1,27 +1,19 @@
 const CACHE_NAME = 'v1';
 const urlsToCache = [
     '/',
-    '/styles/main.css',
-    '/scripts/main.js'
+    './styles/main.css',
+    './scripts/main.js'
 ];
 
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
+                console.log('Caching install successfully');
                 return cache.addAll(urlsToCache);
             })
-    );
-});
-
-self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
+            .catch(err => {
+                console.error('Error caching files:', err);
             })
     );
 });
@@ -37,32 +29,55 @@ self.addEventListener('activate', event => {
                     }
                 })
             );
+        }).then(() => {
+            const request = indexedDB.open(CACHE_NAME, 1);
+            request.onupgradeneeded = event => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains('localStorage')) {
+                    db.createObjectStore('localStorage', { keyPath: 'key' });
+                }
+            };
+            request.onsuccess = event => {
+                const db = event.target.result;
+                console.log('IndexedDB initialize successfully');
+            };
+            request.onerror = event => {
+                console.error('Error IndexedDB', event.target.error);
+            };
         })
     );
 });
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
-        .then(function (registration) {
-            console.log('ServiceWorker registration successful with scope: ', registration.scope);
-        })
-        .catch(function (err) {
-            console.log('ServiceWorker registration failed: ', err);
+
+
+
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => {
+                if (response) {
+                    return response;
+                }
+                return fetch(event.request);
+            })
+    );
+});
+
+self.addEventListener('message', event => {
+    if (event.data && event.data.type === 'SAVE_TO_LOCAL_STORAGE') {
+        const { key, value } = event.data;
+        const request = indexedDB.open(CACHE_NAME);
+        request.onsuccess = event => {
+            const db = event.target.result;
+            const transaction = db.transaction(['localStorage'], 'readwrite');
+            const store = transaction.objectStore('localStorage');
+            store.put({ key, value });
+        };
+    } else if (event.data && event.data.type === 'CLEAR_CACHE') {
+        caches.keys().then(cacheNames => {
+            cacheNames.forEach(cacheName => {
+                caches.delete(cacheName);
+            });
         });
-}
-
-document.addEventListener('DOMContentLoaded', (event) => {
-    const offlineForm = document.getElementById('offline-form');
-    const dataField = document.getElementById('data-field');
-    const submitButton = document.getElementById('submit-button');
-
-    offlineForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        localStorage.setItem('offlineData', dataField.value);
-        alert('Дані збережено для офлайн використання!');
-    });
-
-    if (localStorage.getItem('offlineData')) {
-        dataField.value = localStorage.getItem('offlineData');
     }
 });

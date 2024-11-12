@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Демо веб-сайт</title>
+    <title>Демо service-worker</title>
     <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
-    <h1>Вітаємо на демо-сайті!</h1>
-    <p>Це демонстраційний контент.</p>
+    <h1></h1>
+    <p>Введення даних для збереження в localStorage</p>
     <form id="offline-form">
         <label for="data-field">Введіть дані:</label>
         <input type="text" id="data-field" name="data-field" required>
         <button type="submit" id="submit-button">Зберегти</button>
+        <button id="clear-cache-button">Очистити кеш</button>
     </form>
     <script src="scripts/main.js"></script>
 </body>
